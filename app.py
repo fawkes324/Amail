@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = "your_secret_key"
 
 # Set your GROQ API key here.
-GROQ_API_KEY = "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"
+GROQ_API_KEY = ""
 groq_client = groq.Groq(api_key=GROQ_API_KEY)
 
 # Mapping of user-friendly folder names to Gmail's IMAP folder names.
