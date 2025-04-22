@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-image: url("https://res.cloudinary.com/dxhmbjci5/image/upload/v1742824963/LoginImage_p5rgv2.webp");
+        background-size: cover;
+        height: 100vh;
+        width: 100vw;
+        background-repeat: repeat-x;
+        animation: scrollHorizontal 10s linear infinite alternate;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      @keyframes scrollHorizontal {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        animation: fadeInSlide 1s ease-out;
+      }
+      .error-message {
+        color: #dc3545;
+        font-family: "Roboto";
+        font-size: 14px;
+      }
+      @keyframes fadeInSlide {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      input,
+      button {
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+      }
+      input:focus {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      button:hover {
+        transform: scale(1.05);
+      }
+      #myForm {
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card w-25 text-center p-4">
+      <h2>Login</h2>
+      <form method="post" id="myForm" action="/login">
+        <div class="mb-2">
+          <label for="email" class="form-label">Email:</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+          <p id="emailErrMsg" class="error-message"></p>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">App Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+          <p id="passErrMsg" class="error-message"></p>
+        </div>
+        <button type="submit" class="btn btn-info w-100">Login</button>
+      </form>
+    </div>
+    <script type="text/javascript">
+      let myFormEl = document.getElementById("myForm");
+      let emailEl = document.getElementById("email");
+      let passEl = document.getElementById("password");
+
+      let emailErrMsgEl = document.getElementById("emailErrMsg");
+      let passErrMsgEl = document.getElementById("passErrMsg");
+
+      emailEl.addEventListener("blur", function (event) {
+        if (event.target.value === "") {
+          emailErrMsgEl.textContent = "Required*";
+        } else {
+          emailErrMsgEl.textContent = "";
+        }
+      });
+
+      passEl.addEventListener("blur", function (event) {
+        if (event.target.value === "") {
+          passErrMsgEl.textContent = "Required*";
+        } else {
+          passErrMsgEl.textContent = "";
+        }
+      });
+
+      // Removed the submit event prevention to allow proper form submission.
+      // myFormEl.addEventListener("submit", function (event) {
+      //   event.preventDefault();
+      // });
+    </script>
+  </body>
+</html>

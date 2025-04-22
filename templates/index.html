@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vmail Voice Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <style>
+      @media screen and (min-width: 992px) {
+        @keyframes scrollVertical {
+          0% {
+            background-position: 50% 0%;
+          }
+          100% {
+            background-position: 50% 100%;
+          }
+        }
+        body {
+          width: 100vw;
+          height: 100vh;
+          background: url("https://res.cloudinary.com/dxhmbjci5/image/upload/v1742888636/HomePage_piasur.webp");
+          background-size: cover;
+          background-repeat: repeat-y;
+          animation: scrollVertical 10s linear infinite alternate;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+      @media screen and (max-width: 991px) {
+        body {
+          background-image: url("https://res.cloudinary.com/dxhmbjci5/image/upload/v1742888636/HomePage_piasur.webp");
+          background-size: cover;
+          height: 100vh;
+          width: 100vw;
+          background-repeat: repeat-x;
+          animation: scrollHorizontal 10s linear infinite alternate;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        @keyframes scrollHorizontal {
+          0% {
+            background-position: 0% 50%;
+          }
+          100% {
+            background-position: 100% 50%;
+          }
+        }
+      }
+      .micro-phone {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.85);
+        width: 25%;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        margin-top: 2rem;
+        padding: 0;
+      }
+      .micLabel {
+        font-family: "Roboto Mono";
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.85);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      h2 {
+        margin-bottom: 1rem;
+      }
+      #prompt {
+        font-size: 1.2rem;
+        padding: 0.5rem;
+      }
+      #micButton {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+      .toast-container {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+      }
+      .main-heading {
+        font-weight: bolder;
+        text-align: center;
+      }
+      .form-control {
+        overflow-x: scroll;
+        width: 25%;
+        height: 150px;
+        overflow-y: scroll;
+      }
+      .form-label {
+        font-weight: bold;
+        font-family: "Roboto";
+        font-size: 20px;
+      }
+      i {
+        font-size: 60px;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="main-heading">Welcome to Vmail</h2>
+      <form method="POST" action="{{ url_for('execute') }}">
+        <div class="mb-3">
+          <label for="prompt" class="form-label">Enter your command:</label>
+          <div class="input-group">
+            <textarea
+              type="textarea"
+              rows="50"
+              cols="30"
+              id="prompt"
+              name="prompt"
+              placeholder="Enter your command"
+              class="form-control"
+              required
+            ></textarea>
+          </div>
+        </div>
+        <button type="submit" id="executeButton" class="btn btn-primary">
+          Execute
+        </button>
+      </form>
+    </div>
+    <div class="micro-phone">
+      <button type="button" id="micButton" title="Tap to speak">
+        <i id="micIcon" class="bi bi-mic"></i>
+      </button>
+      <label for="micButton" class="micLabel">Tap to speak</label>
+    </div>
+
+    <div class="toast-container p-3">
+      <div
+        id="toastMessage"
+        class="toast align-items-center text-white bg-success border-0"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="d-flex">
+          <div class="toast-body" id="toastBody"></div>
+          <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="emailModalLabel">Email Viewer</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              id="closeModal"
+            ></button>
+          </div>
+          <div class="modal-body" id="emailContent"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="prevEmail">Previous</button>
+            <button type="button" class="btn btn-secondary" id="nextEmail">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const GROQ_API_KEY = "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";
+      const GROQ_ENDPOINT = "https://api.groq.ai/v1/generate";
+      let currentRecognition = null;
+      const emails = {{ emails | tojson | safe }};
+      let emailIndex = 0;
+      let emailModalActive = false;
+      let emailReading = false;
+
+      const emailContent = document.getElementById("emailContent");
+      const emailModal = new bootstrap.Modal(document.getElementById("emailModal"));
+
+      function getFemaleVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        return voices.find(v => v.name.toLowerCase().includes("zira")) ||
+               voices.find(v => v.name.toLowerCase().includes("female")) ||
+               voices[0];
+      }
+
+      function speak(text, callback) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.voice = getFemaleVoice();
+        utterance.onend = () => { if(callback) setTimeout(callback, 500); };
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function startCommandListening() {
+        speak("Listening", () => {
+          currentRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+          currentRecognition.continuous = false;
+          currentRecognition.interimResults = false;
+          currentRecognition.lang = "en-US";
+          currentRecognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.trim();
+            console.log("Command recognized:", transcript);
+            document.getElementById("prompt").value = transcript;
+          };
+          currentRecognition.onerror = (event) => {
+            console.error("Command recognition error:", event.error);
+          };
+          currentRecognition.onend = () => {
+            setTimeout(() => {
+              document.getElementById("executeButton").click();
+            }, 3000);
+          };
+          currentRecognition.start();
+        });
+      }
+
+      function showToast(message) {
+        document.getElementById("toastBody").textContent = message;
+        let toast = new bootstrap.Toast(document.getElementById("toastMessage"));
+        toast.show();
+        speak(message, () => {});
+      }
+
+      function showEmail(index) {
+        if(emails.length > 0) {
+          const email = emails[index];
+          emailContent.innerHTML = `<b>Section:</b> ${email.section || "Unknown"}<br>
+                                    <b>From:</b> ${email.from || "Unknown"}<br>
+                                    <b>Subject:</b> ${email.subject || "No Subject"}<br>
+                                    <b>Body:</b> <pre>${email.body || "No Content"}</pre>`;
+          emailModal.show();
+          emailModalActive = true;
+          askEmailRead();
+        }
+      }
+
+      function askEmailRead() {
+        if (!emailModalActive) return;
+        speak("Do you want me to read this email out loud?", () => {
+          setTimeout(() => {
+            let answerRecog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            answerRecog.continuous = false;
+            answerRecog.interimResults = false;
+            answerRecog.lang = "en-US";
+            answerRecog.onresult = (event) => {
+              const answer = event.results[0][0].transcript.trim().toLowerCase();
+              console.log("Answer recognized:", answer);
+              if (answer.includes("yes")) {
+                readEmailAloud();
+              } else {
+                speak("Okay, not reading it.", () => {});
+              }
+            };
+            answerRecog.onerror = (event) => {
+              console.error("Answer recognition error:", event.error);
+            };
+            answerRecog.start();
+          }, 1000); // Delay added here to let speech synthesis complete
+        });
+      }
+
+      function readEmailAloud() {
+        if(!emailModalActive) return;
+        emailReading = true;
+        const currentEmail = emails[emailIndex];
+        const emailPrompt = "Generate a concise, friendly version of this email content for reading aloud: " + currentEmail.body;
+        fetch(GROQ_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + GROQ_API_KEY
+          },
+          body: JSON.stringify({ prompt: emailPrompt })
+        })
+        .then(response => response.json())
+        .then(data => {
+          const textToRead = data.response || currentEmail.body;
+          speak(textToRead, () => { emailReading = false; });
+        })
+        .catch(error => {
+          console.error("Error generating email read-out:", error);
+          speak(currentEmail.body, () => { emailReading = false; });
+        });
+      }
+
+      function handleEmailNavigation(newIndex) {
+        window.speechSynthesis.cancel();
+        emailReading = false;
+        emailIndex = newIndex;
+        showEmail(emailIndex);
+      }
+
+      document.getElementById("nextEmail").addEventListener("click", () => {
+        if(emailIndex < emails.length - 1) {
+          handleEmailNavigation(emailIndex + 1);
+        }
+      });
+
+      document.getElementById("prevEmail").addEventListener("click", () => {
+        if(emailIndex > 0) {
+          handleEmailNavigation(emailIndex - 1);
+        }
+      });
+
+      document.getElementById("closeModal").addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        emailModalActive = false;
+        emailReading = false;
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("micButton").addEventListener("click", () => {
+          window.speechSynthesis.cancel();
+          startCommandListening();
+        });
+
+        document.body.addEventListener("click", () => {
+          if(window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.getVoices();
+          }
+        }, { once: true });
+
+        const promptEl = document.getElementById("prompt");
+        promptEl.addEventListener("keydown", (event) => {
+          if(event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById("executeButton").click();
+          }
+        });
+
+        const message = "{{ message }}";
+        if(message) {
+          showToast(message);
+        }
+        if(emails.length > 0) {
+          showEmail(emailIndex);
+        }
+      });
+    </script>
+  </body>
+</html>
